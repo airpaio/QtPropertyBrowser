@@ -1,0 +1,11 @@
+*.o
+Makefile
+*.stash
+lib/
+examples/canvas_typed/canvas_typed
+examples/canvas_variant/canvas_variant
+examples/decoration/decoration
+examples/demo/demo
+examples/extension/extension
+examples/object_controller/object_controller
+examples/simple/simple
