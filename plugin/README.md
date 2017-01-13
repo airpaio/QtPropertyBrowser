@@ -4,7 +4,8 @@ This version of the plugin is compatible with Qt 5.7.
 The QtPropertyBrowser and this plugin were built on a Linux Mint 17 machine
 with Qt 5.7.
 
-To build this plugin on your 'Linux machine':
+To build this plugin on your 'Linux machine':  
+
     * make sure that QtPropertyBrowser has been built
     * `cd` into the `plugin` directory
     * run `qmake` to build the Makefile, then
