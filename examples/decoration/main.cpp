@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of the Qt Solutions component.
@@ -38,9 +38,9 @@
 **
 ****************************************************************************/
 
-#include <QtWidgets/QApplication>
-#include <QtCore/QMap>
-#include <QtWidgets/QDoubleSpinBox>
+#include <QApplication>
+#include <QMap>
+#include <QDoubleSpinBox>
 #include "qtpropertybrowser.h"
 #include "qteditorfactory.h"
 #include "qttreepropertybrowser.h"

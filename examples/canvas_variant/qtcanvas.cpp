@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of the Qt Solutions component.
@@ -40,16 +40,16 @@
 
 #include "qtcanvas.h"
 #include <QApplication>
-#include <QtGui/QBitmap>
+#include <QBitmap>
 #include <QDesktopWidget>
-#include <QtGui/QImage>
-#include <QtGui/QPainter>
-#include <QtCore/QTimer>
-#include <QtCore/qhash.h>
-#include <QtCore/qset.h>
-#include <QtCore/qalgorithms.h>
-#include <QtGui/qevent.h>
-#include <QtGui/qpainterpath.h>
+#include <QImage>
+#include <QPainter>
+#include <QTimer>
+#include <qhash.h>
+#include <qset.h>
+#include <qalgorithms.h>
+#include <qevent.h>
+#include <qpainterpath.h>
 
 #include <stdlib.h>
 using namespace Qt;
@@ -1108,7 +1108,7 @@ void QtCanvas::drawArea(const QRect& clip, QPainter* painter, bool dbuf)
         drawCanvasArea(clip, painter, dbuf);
 }
 
-#include <QtCore/QDebug>
+#include <QDebug>
 /*
   \internal
 */

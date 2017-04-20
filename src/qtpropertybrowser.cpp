@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of the Qt Solutions component.
@@ -40,10 +40,10 @@
 
 
 #include "qtpropertybrowser.h"
-#include <QtCore/QSet>
-#include <QtCore/QMap>
-#include <QtGui/QIcon>
-#include <QtWidgets/QLineEdit>
+#include <QSet>
+#include <QMap>
+#include <QIcon>
+#include <QLineEdit>
 
 #if defined(Q_CC_MSVC)
 #    pragma warning(disable: 4786) /* MS VS 6: truncating debug info after 255 characters */
@@ -1854,14 +1854,12 @@ QtBrowserItem *QtAbstractPropertyBrowser::insertProperty(QtProperty *property,
     QList<QtProperty *> pendingList = properties();
     int pos = 0;
     int newPos = 0;
-    QtProperty *properAfterProperty = 0;
     while (pos < pendingList.count()) {
         QtProperty *prop = pendingList.at(pos);
         if (prop == property)
             return 0;
         if (prop == afterProperty) {
             newPos = pos + 1;
-            properAfterProperty = afterProperty;
         }
         pos++;
     }

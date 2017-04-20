@@ -33,4 +33,3 @@ SOURCES     = ../src/qtpropertybrowser.cpp \
               qtpropertybrowsercollection.cpp
 OTHER_FILES += QTPropBrowser.json
 DESTDIR     = $$[QT_INSTALL_PLUGINS]/designer
-QMAKE_POST_LINK += cp /home/cory/Qt/5.7/gcc_64/plugins/designer/libQTPropBrowser.so /home/cory/Qt/Tools/QtCreator/lib/Qt/plugins/designer

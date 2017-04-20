@@ -41,11 +41,16 @@
 #ifndef OBJECTCONTROLLER_H
 #define OBJECTCONTROLLER_H
 
-#include <QWidget>
+#include "qtpropertymanager.h"
+
+#if QT_VERSION >= 0x040400
+QT_BEGIN_NAMESPACE
+#endif
+
 
 class ObjectControllerPrivate;
 
-class ObjectController : public QWidget
+class QT_QTPROPERTYBROWSER_EXPORT ObjectController : public QWidget
 {
 	Q_OBJECT
 public:
@@ -72,5 +77,9 @@ private:
 	Q_DISABLE_COPY(ObjectController)
 	Q_PRIVATE_SLOT(d_func(), void slotValueChanged(QtProperty *, const QVariant &))
 };
+
+#if QT_VERSION >= 0x040400
+QT_END_NAMESPACE
+#endif
 
 #endif

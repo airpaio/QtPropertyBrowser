@@ -1,6 +1,6 @@
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::
-:: Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+:: Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 :: Contact: http://www.qt-project.org/legal
 ::
 :: This file is part of the Qt Solutions component.
@@ -65,6 +65,7 @@ echo run qmake and your make or nmake command.
 echo .
 echo To remove or reconfigure, run make (nmake) distclean.
 echo .
+goto EOF
 
 :PrintUsage
 echo Usage: configure.bat [-library]

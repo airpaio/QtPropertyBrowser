@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of the Qt Solutions component.
@@ -41,20 +41,20 @@
 
 #include "qtpropertymanager.h"
 #include "qtpropertybrowserutils_p.h"
-#include <QtCore/QDateTime>
-#include <QtCore/QLocale>
-#include <QtCore/QMap>
-#include <QtCore/QTimer>
-#include <QtGui/QIcon>
-#include <QtCore/QMetaEnum>
-#include <QtGui/QFontDatabase>
-#include <QtWidgets/QStyleOption>
-#include <QtWidgets/QStyle>
-#include <QtWidgets/QApplication>
-#include <QtGui/QPainter>
-#include <QtWidgets/QLabel>
-#include <QtWidgets/QCheckBox>
-#include <QtWidgets/QLineEdit>
+#include <QDateTime>
+#include <QLocale>
+#include <QMap>
+#include <QTimer>
+#include <QIcon>
+#include <QMetaEnum>
+#include <QFontDatabase>
+#include <QStyleOption>
+#include <QStyle>
+#include <QApplication>
+#include <QPainter>
+#include <QLabel>
+#include <QCheckBox>
+#include <QLineEdit>
 
 #include <limits.h>
 #include <float.h>
@@ -625,11 +625,12 @@ public:
 
     struct Data
     {
-        Data() : val(0), minVal(-INT_MAX), maxVal(INT_MAX), singleStep(1) {}
+        Data() : val(0), minVal(-INT_MAX), maxVal(INT_MAX), singleStep(1), readOnly(false) {}
         int val;
         int minVal;
         int maxVal;
         int singleStep;
+        bool readOnly;
         int minimumValue() const { return minVal; }
         int maximumValue() const { return maxVal; }
         void setMinimumValue(int newMinVal) { setSimpleMinimumData(this, newMinVal); }
@@ -757,6 +758,18 @@ int QtIntPropertyManager::singleStep(const QtProperty *property) const
 }
 
 /*!
+    Returns read-only status of the property.
+
+    When property is read-only it's value can be selected and copied from editor but not modified.
+
+    \sa QtIntPropertyManager::setReadOnly
+*/
+bool QtIntPropertyManager::isReadOnly(const QtProperty *property) const
+{
+    return getData<bool>(d_ptr->m_values, &QtIntPropertyManagerPrivate::Data::readOnly, property, false);
+}
+
+/*!
     \reimp
 */
 QString QtIntPropertyManager::valueText(const QtProperty *property) const
@@ -876,6 +889,29 @@ void QtIntPropertyManager::setSingleStep(QtProperty *property, int step)
 }
 
 /*!
+    Sets read-only status of the property.
+
+    \sa QtIntPropertyManager::setReadOnly
+*/
+void QtIntPropertyManager::setReadOnly(QtProperty *property, bool readOnly)
+{
+    const QtIntPropertyManagerPrivate::PropertyValueMap::iterator it = d_ptr->m_values.find(property);
+    if (it == d_ptr->m_values.end())
+        return;
+
+    QtIntPropertyManagerPrivate::Data data = it.value();
+
+    if (data.readOnly == readOnly)
+        return;
+
+    data.readOnly = readOnly;
+    it.value() = data;
+
+    emit propertyChanged(property);
+    emit readOnlyChanged(property, data.readOnly);
+}
+
+/*!
     \reimp
 */
 void QtIntPropertyManager::initializeProperty(QtProperty *property)
@@ -901,12 +937,13 @@ public:
 
     struct Data
     {
-        Data() : val(0), minVal(-INT_MAX), maxVal(INT_MAX), singleStep(1), decimals(2) {}
+        Data() : val(0), minVal(-INT_MAX), maxVal(INT_MAX), singleStep(1), decimals(2), readOnly(false) {}
         double val;
         double minVal;
         double maxVal;
         double singleStep;
         int decimals;
+        bool readOnly;
         double minimumValue() const { return minVal; }
         double maximumValue() const { return maxVal; }
         void setMinimumValue(double newMinVal) { setSimpleMinimumData(this, newMinVal); }
@@ -1055,6 +1092,18 @@ int QtDoublePropertyManager::decimals(const QtProperty *property) const
 }
 
 /*!
+    Returns read-only status of the property.
+
+    When property is read-only it's value can be selected and copied from editor but not modified.
+
+    \sa QtDoublePropertyManager::setReadOnly
+*/
+bool QtDoublePropertyManager::isReadOnly(const QtProperty *property) const
+{
+    return getData<bool>(d_ptr->m_values, &QtDoublePropertyManagerPrivate::Data::readOnly, property, false);
+}
+
+/*!
     \reimp
 */
 QString QtDoublePropertyManager::valueText(const QtProperty *property) const
@@ -1111,6 +1160,29 @@ void QtDoublePropertyManager::setSingleStep(QtProperty *property, double step)
     it.value() = data;
 
     emit singleStepChanged(property, data.singleStep);
+}
+
+/*!
+    Sets read-only status of the property.
+
+    \sa QtDoublePropertyManager::setReadOnly
+*/
+void QtDoublePropertyManager::setReadOnly(QtProperty *property, bool readOnly)
+{
+    const QtDoublePropertyManagerPrivate::PropertyValueMap::iterator it = d_ptr->m_values.find(property);
+    if (it == d_ptr->m_values.end())
+        return;
+
+    QtDoublePropertyManagerPrivate::Data data = it.value();
+
+    if (data.readOnly == readOnly)
+        return;
+
+    data.readOnly = readOnly;
+    it.value() = data;
+
+    emit propertyChanged(property);
+    emit readOnlyChanged(property, data.readOnly);
 }
 
 /*!
@@ -1231,12 +1303,14 @@ public:
 
     struct Data
     {
-        Data() : regExp(QString(QLatin1Char('*')),  Qt::CaseSensitive, QRegExp::Wildcard), echoMode(QLineEdit::Normal)
+        Data() : regExp(QString(QLatin1Char('*')),  Qt::CaseSensitive, QRegExp::Wildcard),
+            echoMode(QLineEdit::Normal), readOnly(false)
         {
         }
         QString val;
         QRegExp regExp;
         int echoMode;
+        bool readOnly;
     };
 
     typedef QMap<const QtProperty *, Data> PropertyValueMap;
@@ -1337,6 +1411,18 @@ EchoMode QtStringPropertyManager::echoMode(const QtProperty *property) const
 }
 
 /*!
+    Returns read-only status of the property.
+
+    When property is read-only it's value can be selected and copied from editor but not modified.
+
+    \sa QtStringPropertyManager::setReadOnly
+*/
+bool QtStringPropertyManager::isReadOnly(const QtProperty *property) const
+{
+    return getData<bool>(d_ptr->m_values, &QtStringPropertyManagerPrivate::Data::readOnly, property, false);
+}
+
+/*!
     \reimp
 */
 QString QtStringPropertyManager::valueText(const QtProperty *property) const
@@ -1418,6 +1504,7 @@ void QtStringPropertyManager::setRegExp(QtProperty *property, const QRegExp &reg
     emit regExpChanged(property, data.regExp);
 }
 
+
 void QtStringPropertyManager::setEchoMode(QtProperty *property, EchoMode echoMode)
 {
     const QtStringPropertyManagerPrivate::PropertyValueMap::iterator it = d_ptr->m_values.find(property);
@@ -1437,6 +1524,29 @@ void QtStringPropertyManager::setEchoMode(QtProperty *property, EchoMode echoMod
 }
 
 /*!
+    Sets read-only status of the property.
+
+    \sa QtStringPropertyManager::setReadOnly
+*/
+void QtStringPropertyManager::setReadOnly(QtProperty *property, bool readOnly)
+{
+    const QtStringPropertyManagerPrivate::PropertyValueMap::iterator it = d_ptr->m_values.find(property);
+    if (it == d_ptr->m_values.end())
+        return;
+
+    QtStringPropertyManagerPrivate::Data data = it.value();
+
+    if (data.readOnly == readOnly)
+        return;
+
+    data.readOnly = readOnly;
+    it.value() = data;
+
+    emit propertyChanged(property);
+    emit readOnlyChanged(property, data.readOnly);
+}
+
+/*!
     \reimp
 */
 void QtStringPropertyManager::initializeProperty(QtProperty *property)
@@ -1453,15 +1563,62 @@ void QtStringPropertyManager::uninitializeProperty(QtProperty *property)
 }
 
 // QtBoolPropertyManager
+//     Return an icon containing a check box indicator
+static QIcon drawCheckBox(bool value)
+{
+    QStyleOptionButton opt;
+    opt.state |= value ? QStyle::State_On : QStyle::State_Off;
+    opt.state |= QStyle::State_Enabled;
+    const QStyle *style = QApplication::style();
+    // Figure out size of an indicator and make sure it is not scaled down in a list view item
+    // by making the pixmap as big as a list view icon and centering the indicator in it.
+    // (if it is smaller, it can't be helped)
+    const int indicatorWidth = style->pixelMetric(QStyle::PM_IndicatorWidth, &opt);
+    const int indicatorHeight = style->pixelMetric(QStyle::PM_IndicatorHeight, &opt);
+    const int listViewIconSize = indicatorWidth;
+    const int pixmapWidth = indicatorWidth;
+    const int pixmapHeight = qMax(indicatorHeight, listViewIconSize);
+
+    opt.rect = QRect(0, 0, indicatorWidth, indicatorHeight);
+    QPixmap pixmap = QPixmap(pixmapWidth, pixmapHeight);
+    pixmap.fill(Qt::transparent);
+    {
+        // Center?
+        const int xoff = (pixmapWidth  > indicatorWidth)  ? (pixmapWidth  - indicatorWidth)  / 2 : 0;
+        const int yoff = (pixmapHeight > indicatorHeight) ? (pixmapHeight - indicatorHeight) / 2 : 0;
+        QPainter painter(&pixmap);
+        painter.translate(xoff, yoff);
+        style->drawPrimitive(QStyle::PE_IndicatorCheckBox, &opt, &painter);
+    }
+    return QIcon(pixmap);
+}
 
 class QtBoolPropertyManagerPrivate
 {
     QtBoolPropertyManager *q_ptr;
     Q_DECLARE_PUBLIC(QtBoolPropertyManager)
 public:
+    QtBoolPropertyManagerPrivate();
 
-    QMap<const QtProperty *, bool> m_values;
+    struct Data
+    {
+        Data() : val(false), textVisible(true) {}
+        bool val;
+        bool textVisible;
+    };
+
+    typedef QMap<const QtProperty *, Data> PropertyValueMap;
+    PropertyValueMap m_values;
+
+    const QIcon m_checkedIcon;
+    const QIcon m_uncheckedIcon;
 };
+
+QtBoolPropertyManagerPrivate::QtBoolPropertyManagerPrivate() :
+    m_checkedIcon(drawCheckBox(true)),
+    m_uncheckedIcon(drawCheckBox(false))
+{
+}
 
 /*!
     \class QtBoolPropertyManager
@@ -1515,7 +1672,12 @@ QtBoolPropertyManager::~QtBoolPropertyManager()
 */
 bool QtBoolPropertyManager::value(const QtProperty *property) const
 {
-    return d_ptr->m_values.value(property, false);
+    return getValue<bool>(d_ptr->m_values, property, false);
+}
+
+bool QtBoolPropertyManager::textVisible(const QtProperty *property) const
+{
+    return getData<bool>(d_ptr->m_values, &QtBoolPropertyManagerPrivate::Data::textVisible, property, false);
 }
 
 /*!
@@ -1523,44 +1685,17 @@ bool QtBoolPropertyManager::value(const QtProperty *property) const
 */
 QString QtBoolPropertyManager::valueText(const QtProperty *property) const
 {
-    const QMap<const QtProperty *, bool>::const_iterator it = d_ptr->m_values.constFind(property);
+    const QtBoolPropertyManagerPrivate::PropertyValueMap::const_iterator it = d_ptr->m_values.constFind(property);
     if (it == d_ptr->m_values.constEnd())
+        return QString();
+
+    const QtBoolPropertyManagerPrivate::Data &data = it.value();
+    if (!data.textVisible)
         return QString();
 
     static const QString trueText = tr("True");
     static const QString falseText = tr("False");
-    return it.value() ? trueText : falseText;
-}
-
-// Return an icon containing a check box indicator
-static QIcon drawCheckBox(bool value)
-{
-    QStyleOptionButton opt;
-    opt.state |= value ? QStyle::State_On : QStyle::State_Off;
-    opt.state |= QStyle::State_Enabled;
-    const QStyle *style = QApplication::style();
-    // Figure out size of an indicator and make sure it is not scaled down in a list view item
-    // by making the pixmap as big as a list view icon and centering the indicator in it.
-    // (if it is smaller, it can't be helped)
-    const int indicatorWidth = style->pixelMetric(QStyle::PM_IndicatorWidth, &opt);
-    const int indicatorHeight = style->pixelMetric(QStyle::PM_IndicatorHeight, &opt);
-    const int listViewIconSize = indicatorWidth;
-    const int pixmapWidth = indicatorWidth;
-    const int pixmapHeight = qMax(indicatorHeight, listViewIconSize);
-
-    opt.rect = QRect(0, 0, indicatorWidth, indicatorHeight);
-    QPixmap pixmap = QPixmap(pixmapWidth, pixmapHeight);
-    pixmap.fill(Qt::transparent);
-    {
-        // Center?
-        const int xoff = (pixmapWidth  > indicatorWidth)  ? (pixmapWidth  - indicatorWidth)  / 2 : 0;
-        const int yoff = (pixmapHeight > indicatorHeight) ? (pixmapHeight - indicatorHeight) / 2 : 0;
-        QPainter painter(&pixmap);
-        painter.translate(xoff, yoff);
-        QCheckBox cb;
-        style->drawPrimitive(QStyle::PE_IndicatorCheckBox, &opt, &painter, &cb);
-    }
-    return QIcon(pixmap);
+    return data.val ? trueText : falseText;
 }
 
 /*!
@@ -1568,13 +1703,11 @@ static QIcon drawCheckBox(bool value)
 */
 QIcon QtBoolPropertyManager::valueIcon(const QtProperty *property) const
 {
-    const QMap<const QtProperty *, bool>::const_iterator it = d_ptr->m_values.constFind(property);
+    const QtBoolPropertyManagerPrivate::PropertyValueMap::const_iterator it = d_ptr->m_values.constFind(property);
     if (it == d_ptr->m_values.constEnd())
         return QIcon();
 
-    static const QIcon checkedIcon = drawCheckBox(true);
-    static const QIcon uncheckedIcon = drawCheckBox(false);
-    return it.value() ? checkedIcon : uncheckedIcon;
+    return it.value().val ? d_ptr->m_checkedIcon : d_ptr->m_uncheckedIcon;
 }
 
 /*!
@@ -1586,10 +1719,38 @@ QIcon QtBoolPropertyManager::valueIcon(const QtProperty *property) const
 */
 void QtBoolPropertyManager::setValue(QtProperty *property, bool val)
 {
-    setSimpleValue<bool, bool, QtBoolPropertyManager>(d_ptr->m_values, this,
-                &QtBoolPropertyManager::propertyChanged,
-                &QtBoolPropertyManager::valueChanged,
-                property, val);
+    const QtBoolPropertyManagerPrivate::PropertyValueMap::iterator it = d_ptr->m_values.find(property);
+    if (it == d_ptr->m_values.end())
+        return;
+
+    QtBoolPropertyManagerPrivate::Data data = it.value();
+
+    if (data.val == val)
+        return;
+
+    data.val = val;
+    it.value() = data;
+
+    emit propertyChanged(property);
+    emit valueChanged(property, data.val);
+}
+
+void QtBoolPropertyManager::setTextVisible(QtProperty *property, bool textVisible)
+{
+    const QtBoolPropertyManagerPrivate::PropertyValueMap::iterator it = d_ptr->m_values.find(property);
+    if (it == d_ptr->m_values.end())
+        return;
+
+    QtBoolPropertyManagerPrivate::Data data = it.value();
+
+    if (data.textVisible == textVisible)
+        return;
+
+    data.textVisible = textVisible;
+    it.value() = data;
+
+    emit propertyChanged(property);
+    emit textVisibleChanged(property, data.textVisible);
 }
 
 /*!
@@ -1597,7 +1758,7 @@ void QtBoolPropertyManager::setValue(QtProperty *property, bool val)
 */
 void QtBoolPropertyManager::initializeProperty(QtProperty *property)
 {
-    d_ptr->m_values[property] = false;
+    d_ptr->m_values[property] = QtBoolPropertyManagerPrivate::Data();
 }
 
 /*!
@@ -4648,780 +4809,6 @@ void QtRectFPropertyManager::uninitializeProperty(QtProperty *property)
     d_ptr->m_values.remove(property);
 }
 
-
-// QtMarginsPropertyManager
-
-class QtMarginsPropertyManagerPrivate
-{
-    QtMarginsPropertyManager *q_ptr;
-    Q_DECLARE_PUBLIC(QtMarginsPropertyManager)
-public:
-
-    void slotIntChanged(QtProperty *property, int value);
-    void slotPropertyDestroyed(QtProperty *property);
-    void setConstraint(QtProperty *property, const QMargins &constraint, const QMargins &val);
-
-    struct Data
-    {
-        Data() : val(0, 0, 0, 0) {}
-        QMargins val;
-        QMargins constraint;
-    };
-
-    typedef QMap<const QtProperty *, Data> PropertyValueMap;
-    PropertyValueMap m_values;
-
-    QtIntPropertyManager *m_intPropertyManager;
-
-    QMap<const QtProperty *, QtProperty *> m_propertyToX;
-    QMap<const QtProperty *, QtProperty *> m_propertyToY;
-    QMap<const QtProperty *, QtProperty *> m_propertyToW;
-    QMap<const QtProperty *, QtProperty *> m_propertyToH;
-
-    QMap<const QtProperty *, QtProperty *> m_xToProperty;
-    QMap<const QtProperty *, QtProperty *> m_yToProperty;
-    QMap<const QtProperty *, QtProperty *> m_wToProperty;
-    QMap<const QtProperty *, QtProperty *> m_hToProperty;
-};
-
-void QtMarginsPropertyManagerPrivate::slotIntChanged(QtProperty *property, int value)
-{
-    if (QtProperty *prop = m_xToProperty.value(property, 0)) {
-        QMargins r = m_values[prop].val;
-        r.setLeft(value);
-        q_ptr->setValue(prop, r);
-    } else if (QtProperty *prop = m_yToProperty.value(property)) {
-        QMargins r = m_values[prop].val;
-        r.setTop(value);
-        q_ptr->setValue(prop, r);
-    } else if (QtProperty *prop = m_wToProperty.value(property, 0)) {
-        Data data = m_values[prop];
-        QMargins r = data.val;
-        r.setRight(value);
-				// XXX constraints
-//        if (!data.constraint.isNull() && data.constraint.x() + data.constraint.width() < r.x() + r.width()) {
-//            r.moveLeft(data.constraint.left() + data.constraint.width() - r.width());
-//        }
-        q_ptr->setValue(prop, r);
-    } else if (QtProperty *prop = m_hToProperty.value(property, 0)) {
-        Data data = m_values[prop];
-        QMargins r = data.val;
-        r.setBottom(value);
-				// XXX constraints
-//        if (!data.constraint.isNull() && data.constraint.y() + data.constraint.height() < r.y() + r.height()) {
-//            r.moveTop(data.constraint.top() + data.constraint.height() - r.height());
-//        }
-        q_ptr->setValue(prop, r);
-    }
-}
-
-void QtMarginsPropertyManagerPrivate::slotPropertyDestroyed(QtProperty *property)
-{
-    if (QtProperty *pointProp = m_xToProperty.value(property, 0)) {
-        m_propertyToX[pointProp] = 0;
-        m_xToProperty.remove(property);
-    } else if (QtProperty *pointProp = m_yToProperty.value(property, 0)) {
-        m_propertyToY[pointProp] = 0;
-        m_yToProperty.remove(property);
-    } else if (QtProperty *pointProp = m_wToProperty.value(property, 0)) {
-        m_propertyToW[pointProp] = 0;
-        m_wToProperty.remove(property);
-    } else if (QtProperty *pointProp = m_hToProperty.value(property, 0)) {
-        m_propertyToH[pointProp] = 0;
-        m_hToProperty.remove(property);
-    }
-}
-
-void QtMarginsPropertyManagerPrivate::setConstraint(QtProperty *property,
-            const QMargins &constraint, const QMargins &val)
-{
-    const bool isNull = constraint.isNull();
-    const int left   = isNull ? INT_MAX : constraint.left();
-    const int right  = isNull ? INT_MAX : constraint.right();
-    const int top    = isNull ? INT_MAX : constraint.top();
-    const int bottom = isNull ? INT_MAX : constraint.bottom();
-
-    m_intPropertyManager->setRange(m_propertyToX[property], INT_MIN, INT_MAX);
-    m_intPropertyManager->setRange(m_propertyToY[property], INT_MIN, INT_MAX);
-    m_intPropertyManager->setRange(m_propertyToW[property], INT_MIN, INT_MAX);
-    m_intPropertyManager->setRange(m_propertyToH[property], INT_MIN, INT_MAX);
-
-    m_intPropertyManager->setValue(m_propertyToX[property], val.left());
-    m_intPropertyManager->setValue(m_propertyToY[property], val.top());
-    m_intPropertyManager->setValue(m_propertyToW[property], val.right());
-    m_intPropertyManager->setValue(m_propertyToH[property], val.bottom());
-}
-
-/*!
-    \class QtMarginsPropertyManager
-
-    \brief The QtMarginsPropertyManager provides and manages QMargins properties.
-
-    \sa QtAbstractPropertyManager, QtIntPropertyManager, QtRectPropertyManager
-*/
-
-/*!
-    \fn void QtRectPropertyManager::valueChanged(QtProperty *property, const QRect &value)
-
-    This signal is emitted whenever a property created by this manager
-    changes its value, passing a pointer to the \a property and the new
-    \a value as parameters.
-
-    \sa setValue()
-*/
-
-/*!
-    \fn void QtRectPropertyManager::constraintChanged(QtProperty *property, const QRect &constraint)
-
-    This signal is emitted whenever property changes its constraint
-    rectangle, passing a pointer to the \a property and the new \a
-    constraint rectangle as parameters.
-
-    \sa setConstraint()
-*/
-
-/*!
-    Creates a manager with the given \a parent.
-*/
-QtMarginsPropertyManager::QtMarginsPropertyManager(QObject *parent)
-    : QtAbstractPropertyManager(parent)
-{
-    d_ptr = new QtMarginsPropertyManagerPrivate;
-    d_ptr->q_ptr = this;
-
-    d_ptr->m_intPropertyManager = new QtIntPropertyManager(this);
-    connect(d_ptr->m_intPropertyManager, SIGNAL(valueChanged(QtProperty *, int)),
-                this, SLOT(slotIntChanged(QtProperty *, int)));
-    connect(d_ptr->m_intPropertyManager, SIGNAL(propertyDestroyed(QtProperty *)),
-                this, SLOT(slotPropertyDestroyed(QtProperty *)));
-}
-
-/*!
-    Destroys this manager, and all the properties it has created.
-*/
-QtMarginsPropertyManager::~QtMarginsPropertyManager()
-{
-    clear();
-    delete d_ptr;
-}
-
-/*!
-    Returns the manager that creates the nested \e x, \e y, \e width
-    and \e height subproperties.
-
-    In order to provide editing widgets for the mentioned
-    subproperties in a property browser widget, this manager must be
-    associated with an editor factory.
-
-    \sa QtAbstractPropertyBrowser::setFactoryForManager()
-*/
-QtIntPropertyManager *QtMarginsPropertyManager::subIntPropertyManager() const
-{
-    return d_ptr->m_intPropertyManager;
-}
-
-/*!
-    Returns the given \a property's value.
-
-    If the given \a property is not managed by this manager, this
-    function returns an invalid rectangle.
-
-    \sa setValue(), constraint()
-*/
-QMargins QtMarginsPropertyManager::value(const QtProperty *property) const
-{
-    return getValue<QMargins>(d_ptr->m_values, property);
-}
-
-/*!
-    Returns the given \a property's constraining rectangle. If returned value is null QRect it means there is no constraint applied.
-
-    \sa value(), setConstraint()
-*/
-QMargins QtMarginsPropertyManager::constraint(const QtProperty *property) const
-{
-    return getData<QMargins>(d_ptr->m_values, &QtMarginsPropertyManagerPrivate::Data::constraint, property, QMargins());
-}
-
-/*!
-    \reimp
-*/
-QString QtMarginsPropertyManager::valueText(const QtProperty *property) const
-{
-    const QtMarginsPropertyManagerPrivate::PropertyValueMap::const_iterator it = d_ptr->m_values.constFind(property);
-    if (it == d_ptr->m_values.constEnd())
-        return QString();
-    const QMargins v = it.value().val;
-    return QString(tr("[%1, %2, %3, %4]").arg(QString::number(v.left()))
-                                .arg(QString::number(v.top()))
-                                .arg(QString::number(v.right()))
-                                .arg(QString::number(v.bottom())));
-}
-
-/*!
-    \fn void QtMarginsPropertyManager::setValue(QtProperty *property, const QMargins &value)
-
-    Sets the value of the given \a property to \a value. Nested
-    properties are updated automatically.
-
-    If the specified \a value is not inside the given \a property's
-    constraining rectangle, the value is adjusted accordingly to fit
-    within the constraint.
-
-    \sa value(), setConstraint(), valueChanged()
-*/
-void QtMarginsPropertyManager::setValue(QtProperty *property, const QMargins &val)
-{
-    const QtMarginsPropertyManagerPrivate::PropertyValueMap::iterator it = d_ptr->m_values.find(property);
-    if (it == d_ptr->m_values.end())
-        return;
-
-    QtMarginsPropertyManagerPrivate::Data data = it.value();
-
-    QMargins newRect = val;
-    if (!data.constraint.isNull()) {
-        const QMargins r1 = data.constraint;
-        const QMargins r2 = newRect;
-        newRect.setLeft(qMax(r1.left(), r2.left()));
-        newRect.setRight(qMin(r1.right(), r2.right()));
-        newRect.setTop(qMax(r1.top(), r2.top()));
-        newRect.setBottom(qMin(r1.bottom(), r2.bottom()));
-    }
-
-    if (data.val == newRect)
-        return;
-
-    data.val = newRect;
-
-    it.value() = data;
-    d_ptr->m_intPropertyManager->setValue(d_ptr->m_propertyToX[property], newRect.left());
-    d_ptr->m_intPropertyManager->setValue(d_ptr->m_propertyToY[property], newRect.top());
-    d_ptr->m_intPropertyManager->setValue(d_ptr->m_propertyToW[property], newRect.right());
-    d_ptr->m_intPropertyManager->setValue(d_ptr->m_propertyToH[property], newRect.bottom());
-
-    emit propertyChanged(property);
-    emit valueChanged(property, data.val);
-}
-
-/*!
-    Sets the given \a property's constraining margins to \a
-    constraint.
-
-    When setting the constraint, the current value is adjusted if
-    necessary (ensuring that the current margins value is inside the
-    constraint). In order to reset the constraint pass a null QMargins value.
-
-    \sa setValue(), constraint(), constraintChanged()
-*/
-void QtMarginsPropertyManager::setConstraint(QtProperty *property, const QMargins &constraint)
-{
-    const QtMarginsPropertyManagerPrivate::PropertyValueMap::iterator it = d_ptr->m_values.find(property);
-    if (it == d_ptr->m_values.end())
-        return;
-
-    QtMarginsPropertyManagerPrivate::Data data = it.value();
-
-    QMargins newConstraint = constraint;
-    if (data.constraint == newConstraint)
-        return;
-
-    const QMargins oldVal = data.val;
-
-    data.constraint = newConstraint;
-
-    if (!data.constraint.isNull()) {
-        QMargins r1 = data.constraint;
-        QMargins r2 = data.val;
-				
-				// XXX constraints
-//        if (r2.ri() > r1.width())
-//            r2.setWidth(r1.width());
-//        if (r2.height() > r1.height())
-//            r2.setHeight(r1.height());
-//        if (r2.left() < r1.left())
-//            r2.moveLeft(r1.left());
-//        else if (r2.right() > r1.right())
-//            r2.moveRight(r1.right());
-//        if (r2.top() < r1.top())
-//            r2.moveTop(r1.top());
-//        else if (r2.bottom() > r1.bottom())
-//            r2.moveBottom(r1.bottom());
-
-        data.val = r2;
-    }
-
-    it.value() = data;
-
-    emit constraintChanged(property, data.constraint);
-
-    d_ptr->setConstraint(property, data.constraint, data.val);
-
-    if (data.val == oldVal)
-        return;
-
-    emit propertyChanged(property);
-    emit valueChanged(property, data.val);
-}
-
-/*!
-    \reimp
-*/
-void QtMarginsPropertyManager::initializeProperty(QtProperty *property)
-{
-    d_ptr->m_values[property] = QtMarginsPropertyManagerPrivate::Data();
-
-    QtProperty *xProp = d_ptr->m_intPropertyManager->addProperty();
-    xProp->setPropertyName(tr("Left"));
-    d_ptr->m_intPropertyManager->setValue(xProp, 0);
-    d_ptr->m_propertyToX[property] = xProp;
-    d_ptr->m_xToProperty[xProp] = property;
-    property->addSubProperty(xProp);
-
-    QtProperty *yProp = d_ptr->m_intPropertyManager->addProperty();
-    yProp->setPropertyName(tr("Top"));
-    d_ptr->m_intPropertyManager->setValue(yProp, 0);
-    d_ptr->m_propertyToY[property] = yProp;
-    d_ptr->m_yToProperty[yProp] = property;
-    property->addSubProperty(yProp);
-
-    QtProperty *wProp = d_ptr->m_intPropertyManager->addProperty();
-    wProp->setPropertyName(tr("Right"));
-    d_ptr->m_intPropertyManager->setValue(wProp, 0);
-    d_ptr->m_propertyToW[property] = wProp;
-    d_ptr->m_wToProperty[wProp] = property;
-    property->addSubProperty(wProp);
-
-    QtProperty *hProp = d_ptr->m_intPropertyManager->addProperty();
-    hProp->setPropertyName(tr("Bottom"));
-    d_ptr->m_intPropertyManager->setValue(hProp, 0);
-    d_ptr->m_propertyToH[property] = hProp;
-    d_ptr->m_hToProperty[hProp] = property;
-    property->addSubProperty(hProp);
-}
-
-/*!
-    \reimp
-*/
-void QtMarginsPropertyManager::uninitializeProperty(QtProperty *property)
-{
-    QtProperty *xProp = d_ptr->m_propertyToX[property];
-    if (xProp) {
-        d_ptr->m_xToProperty.remove(xProp);
-        delete xProp;
-    }
-    d_ptr->m_propertyToX.remove(property);
-
-    QtProperty *yProp = d_ptr->m_propertyToY[property];
-    if (yProp) {
-        d_ptr->m_yToProperty.remove(yProp);
-        delete yProp;
-    }
-    d_ptr->m_propertyToY.remove(property);
-
-    QtProperty *wProp = d_ptr->m_propertyToW[property];
-    if (wProp) {
-        d_ptr->m_wToProperty.remove(wProp);
-        delete wProp;
-    }
-    d_ptr->m_propertyToW.remove(property);
-
-    QtProperty *hProp = d_ptr->m_propertyToH[property];
-    if (hProp) {
-        d_ptr->m_hToProperty.remove(hProp);
-        delete hProp;
-    }
-    d_ptr->m_propertyToH.remove(property);
-
-    d_ptr->m_values.remove(property);
-}
-
-// QtMarginsFPropertyManager
-
-class QtMarginsFPropertyManagerPrivate
-{
-    QtMarginsFPropertyManager *q_ptr;
-    Q_DECLARE_PUBLIC(QtMarginsFPropertyManager)
-public:
-
-    void slotDoubleChanged(QtProperty *property, double value);
-    void slotPropertyDestroyed(QtProperty *property);
-    void setConstraint(QtProperty *property, const QMarginsF &constraint, const QMarginsF &val);
-
-    struct Data
-    {
-        Data() : val(0, 0, 0, 0) {}
-        QMarginsF val;
-        QMarginsF constraint;
-    };
-
-    typedef QMap<const QtProperty *, Data> PropertyValueMap;
-    PropertyValueMap m_values;
-
-    QtDoublePropertyManager *m_doublePropertyManager;
-
-    QMap<const QtProperty *, QtProperty *> m_propertyToX;
-    QMap<const QtProperty *, QtProperty *> m_propertyToY;
-    QMap<const QtProperty *, QtProperty *> m_propertyToW;
-    QMap<const QtProperty *, QtProperty *> m_propertyToH;
-
-    QMap<const QtProperty *, QtProperty *> m_xToProperty;
-    QMap<const QtProperty *, QtProperty *> m_yToProperty;
-    QMap<const QtProperty *, QtProperty *> m_wToProperty;
-    QMap<const QtProperty *, QtProperty *> m_hToProperty;
-};
-
-void QtMarginsFPropertyManagerPrivate::slotDoubleChanged(QtProperty *property, double value)
-{
-    if (QtProperty *prop = m_xToProperty.value(property, 0)) {
-        QMarginsF r = m_values[prop].val;
-        r.setLeft(value);
-        q_ptr->setValue(prop, r);
-    } else if (QtProperty *prop = m_yToProperty.value(property)) {
-        QMarginsF r = m_values[prop].val;
-        r.setTop(value);
-        q_ptr->setValue(prop, r);
-    } else if (QtProperty *prop = m_wToProperty.value(property, 0)) {
-        Data data = m_values[prop];
-        QMarginsF r = data.val;
-        r.setRight(value);
-				// XXX constraints
-//        if (!data.constraint.isNull() && data.constraint.x() + data.constraint.width() < r.x() + r.width()) {
-//            r.moveLeft(data.constraint.left() + data.constraint.width() - r.width());
-//        }
-        q_ptr->setValue(prop, r);
-    } else if (QtProperty *prop = m_hToProperty.value(property, 0)) {
-        Data data = m_values[prop];
-        QMarginsF r = data.val;
-        r.setBottom(value);
-				// XXX constraints
-//        if (!data.constraint.isNull() && data.constraint.y() + data.constraint.height() < r.y() + r.height()) {
-//            r.moveTop(data.constraint.top() + data.constraint.height() - r.height());
-//        }
-        q_ptr->setValue(prop, r);
-    }
-}
-
-void QtMarginsFPropertyManagerPrivate::slotPropertyDestroyed(QtProperty *property)
-{
-    if (QtProperty *pointProp = m_xToProperty.value(property, 0)) {
-        m_propertyToX[pointProp] = 0;
-        m_xToProperty.remove(property);
-    } else if (QtProperty *pointProp = m_yToProperty.value(property, 0)) {
-        m_propertyToY[pointProp] = 0;
-        m_yToProperty.remove(property);
-    } else if (QtProperty *pointProp = m_wToProperty.value(property, 0)) {
-        m_propertyToW[pointProp] = 0;
-        m_wToProperty.remove(property);
-    } else if (QtProperty *pointProp = m_hToProperty.value(property, 0)) {
-        m_propertyToH[pointProp] = 0;
-        m_hToProperty.remove(property);
-    }
-}
-
-void QtMarginsFPropertyManagerPrivate::setConstraint(QtProperty *property,
-            const QMarginsF &constraint, const QMarginsF &val)
-{
-    const bool isNull = constraint.isNull();
-    const int left   = isNull ? DBL_MAX : constraint.left();
-    const int right  = isNull ? DBL_MAX : constraint.right();
-    const int top    = isNull ? DBL_MAX : constraint.top();
-    const int bottom = isNull ? DBL_MAX : constraint.bottom();
-
-    m_doublePropertyManager->setRange(m_propertyToX[property], DBL_MIN, DBL_MAX);
-    m_doublePropertyManager->setRange(m_propertyToY[property], DBL_MIN, DBL_MAX);
-    m_doublePropertyManager->setRange(m_propertyToW[property], DBL_MIN, DBL_MAX);
-    m_doublePropertyManager->setRange(m_propertyToH[property], DBL_MIN, DBL_MAX);
-
-    m_doublePropertyManager->setValue(m_propertyToX[property], val.left());
-    m_doublePropertyManager->setValue(m_propertyToY[property], val.top());
-    m_doublePropertyManager->setValue(m_propertyToW[property], val.right());
-    m_doublePropertyManager->setValue(m_propertyToH[property], val.bottom());
-}
-
-/*!
-    \class QtMarginsFPropertyManager
-
-    \brief The QtMarginsFPropertyManager provides and manages QMarginsF properties.
-
-    \sa QtAbstractPropertyManager, QtIntPropertyManager, QtRectPropertyManager
-*/
-
-/*!
-    \fn void QtRectPropertyManager::valueChanged(QtProperty *property, const QRect &value)
-
-    This signal is emitted whenever a property created by this manager
-    changes its value, passing a pointer to the \a property and the new
-    \a value as parameters.
-
-    \sa setValue()
-*/
-
-/*!
-    \fn void QtRectPropertyManager::constraintChanged(QtProperty *property, const QRect &constraint)
-
-    This signal is emitted whenever property changes its constraint
-    rectangle, passing a pointer to the \a property and the new \a
-    constraint rectangle as parameters.
-
-    \sa setConstraint()
-*/
-
-/*!
-    Creates a manager with the given \a parent.
-*/
-QtMarginsFPropertyManager::QtMarginsFPropertyManager(QObject *parent)
-    : QtAbstractPropertyManager(parent)
-{
-    d_ptr = new QtMarginsFPropertyManagerPrivate;
-    d_ptr->q_ptr = this;
-
-    d_ptr->m_doublePropertyManager = new QtDoublePropertyManager(this);
-    connect(d_ptr->m_doublePropertyManager, SIGNAL(valueChanged(QtProperty *, double)),
-                this, SLOT(slotDoubleChanged(QtProperty *, double)));
-    connect(d_ptr->m_doublePropertyManager, SIGNAL(propertyDestroyed(QtProperty *)),
-                this, SLOT(slotPropertyDestroyed(QtProperty *)));
-}
-
-/*!
-    Destroys this manager, and all the properties it has created.
-*/
-QtMarginsFPropertyManager::~QtMarginsFPropertyManager()
-{
-    clear();
-    delete d_ptr;
-}
-
-/*!
-    Returns the manager that creates the nested \e x, \e y, \e width
-    and \e height subproperties.
-
-    In order to provide editing widgets for the mentioned
-    subproperties in a property browser widget, this manager must be
-    associated with an editor factory.
-
-    \sa QtAbstractPropertyBrowser::setFactoryForManager()
-*/
-QtDoublePropertyManager *QtMarginsFPropertyManager::subDoublePropertyManager() const
-{
-    return d_ptr->m_doublePropertyManager;
-}
-
-/*!
-    Returns the given \a property's value.
-
-    If the given \a property is not managed by this manager, this
-    function returns an invalid rectangle.
-
-    \sa setValue(), constraint()
-*/
-QMarginsF QtMarginsFPropertyManager::value(const QtProperty *property) const
-{
-    return getValue<QMarginsF>(d_ptr->m_values, property);
-}
-
-/*!
-    Returns the given \a property's constraining rectangle. If returned value is null QRect it means there is no constraint applied.
-
-    \sa value(), setConstraint()
-*/
-QMarginsF QtMarginsFPropertyManager::constraint(const QtProperty *property) const
-{
-    return getData<QMarginsF>(d_ptr->m_values, &QtMarginsFPropertyManagerPrivate::Data::constraint, property, QMarginsF());
-}
-
-/*!
-    \reimp
-*/
-QString QtMarginsFPropertyManager::valueText(const QtProperty *property) const
-{
-    const QtMarginsFPropertyManagerPrivate::PropertyValueMap::const_iterator it = d_ptr->m_values.constFind(property);
-    if (it == d_ptr->m_values.constEnd())
-        return QString();
-    const QMarginsF v = it.value().val;
-    return QString(tr("[%1, %2, %3, %4]").arg(QString::number(v.left()))
-                                .arg(QString::number(v.top()))
-                                .arg(QString::number(v.right()))
-                                .arg(QString::number(v.bottom())));
-}
-
-/*!
-    \fn void QtMarginsFPropertyManager::setValue(QtProperty *property, const QMarginsF &value)
-
-    Sets the value of the given \a property to \a value. Nested
-    properties are updated automatically.
-
-    If the specified \a value is not inside the given \a property's
-    constraining rectangle, the value is adjusted accordingly to fit
-    within the constraint.
-
-    \sa value(), setConstraint(), valueChanged()
-*/
-void QtMarginsFPropertyManager::setValue(QtProperty *property, const QMarginsF &val)
-{
-    const QtMarginsFPropertyManagerPrivate::PropertyValueMap::iterator it = d_ptr->m_values.find(property);
-    if (it == d_ptr->m_values.end())
-        return;
-
-    QtMarginsFPropertyManagerPrivate::Data data = it.value();
-
-    QMarginsF newRect = val;
-    if (!data.constraint.isNull()) {
-        const QMarginsF r1 = data.constraint;
-        const QMarginsF r2 = newRect;
-        newRect.setLeft(qMax(r1.left(), r2.left()));
-        newRect.setRight(qMin(r1.right(), r2.right()));
-        newRect.setTop(qMax(r1.top(), r2.top()));
-        newRect.setBottom(qMin(r1.bottom(), r2.bottom()));
-    }
-
-    if (data.val == newRect)
-        return;
-
-    data.val = newRect;
-
-    it.value() = data;
-    d_ptr->m_doublePropertyManager->setValue(d_ptr->m_propertyToX[property], newRect.left());
-    d_ptr->m_doublePropertyManager->setValue(d_ptr->m_propertyToY[property], newRect.top());
-    d_ptr->m_doublePropertyManager->setValue(d_ptr->m_propertyToW[property], newRect.right());
-    d_ptr->m_doublePropertyManager->setValue(d_ptr->m_propertyToH[property], newRect.bottom());
-
-    emit propertyChanged(property);
-    emit valueChanged(property, data.val);
-}
-
-/*!
-    Sets the given \a property's constraining margins to \a
-    constraint.
-
-    When setting the constraint, the current value is adjusted if
-    necessary (ensuring that the current margins value is inside the
-    constraint). In order to reset the constraint pass a null QMarginsF value.
-
-    \sa setValue(), constraint(), constraintChanged()
-*/
-void QtMarginsFPropertyManager::setConstraint(QtProperty *property, const QMarginsF &constraint)
-{
-    const QtMarginsFPropertyManagerPrivate::PropertyValueMap::iterator it = d_ptr->m_values.find(property);
-    if (it == d_ptr->m_values.end())
-        return;
-
-    QtMarginsFPropertyManagerPrivate::Data data = it.value();
-
-    QMarginsF newConstraint = constraint;
-    if (data.constraint == newConstraint)
-        return;
-
-    const QMarginsF oldVal = data.val;
-
-    data.constraint = newConstraint;
-
-    if (!data.constraint.isNull()) {
-        QMarginsF r1 = data.constraint;
-        QMarginsF r2 = data.val;
-				
-				// XXX constraints
-//        if (r2.ri() > r1.width())
-//            r2.setWidth(r1.width());
-//        if (r2.height() > r1.height())
-//            r2.setHeight(r1.height());
-//        if (r2.left() < r1.left())
-//            r2.moveLeft(r1.left());
-//        else if (r2.right() > r1.right())
-//            r2.moveRight(r1.right());
-//        if (r2.top() < r1.top())
-//            r2.moveTop(r1.top());
-//        else if (r2.bottom() > r1.bottom())
-//            r2.moveBottom(r1.bottom());
-
-        data.val = r2;
-    }
-
-    it.value() = data;
-
-    emit constraintChanged(property, data.constraint);
-
-    d_ptr->setConstraint(property, data.constraint, data.val);
-
-    if (data.val == oldVal)
-        return;
-
-    emit propertyChanged(property);
-    emit valueChanged(property, data.val);
-}
-
-/*!
-    \reimp
-*/
-void QtMarginsFPropertyManager::initializeProperty(QtProperty *property)
-{
-    d_ptr->m_values[property] = QtMarginsFPropertyManagerPrivate::Data();
-
-    QtProperty *xProp = d_ptr->m_doublePropertyManager->addProperty();
-    xProp->setPropertyName(tr("Left"));
-    d_ptr->m_doublePropertyManager->setValue(xProp, 0);
-    d_ptr->m_propertyToX[property] = xProp;
-    d_ptr->m_xToProperty[xProp] = property;
-    property->addSubProperty(xProp);
-
-    QtProperty *yProp = d_ptr->m_doublePropertyManager->addProperty();
-    yProp->setPropertyName(tr("Top"));
-    d_ptr->m_doublePropertyManager->setValue(yProp, 0);
-    d_ptr->m_propertyToY[property] = yProp;
-    d_ptr->m_yToProperty[yProp] = property;
-    property->addSubProperty(yProp);
-
-    QtProperty *wProp = d_ptr->m_doublePropertyManager->addProperty();
-    wProp->setPropertyName(tr("Right"));
-    d_ptr->m_doublePropertyManager->setValue(wProp, 0);
-    d_ptr->m_propertyToW[property] = wProp;
-    d_ptr->m_wToProperty[wProp] = property;
-    property->addSubProperty(wProp);
-
-    QtProperty *hProp = d_ptr->m_doublePropertyManager->addProperty();
-    hProp->setPropertyName(tr("Bottom"));
-    d_ptr->m_doublePropertyManager->setValue(hProp, 0);
-    d_ptr->m_propertyToH[property] = hProp;
-    d_ptr->m_hToProperty[hProp] = property;
-    property->addSubProperty(hProp);
-}
-
-/*!
-    \reimp
-*/
-void QtMarginsFPropertyManager::uninitializeProperty(QtProperty *property)
-{
-    QtProperty *xProp = d_ptr->m_propertyToX[property];
-    if (xProp) {
-        d_ptr->m_xToProperty.remove(xProp);
-        delete xProp;
-    }
-    d_ptr->m_propertyToX.remove(property);
-
-    QtProperty *yProp = d_ptr->m_propertyToY[property];
-    if (yProp) {
-        d_ptr->m_yToProperty.remove(yProp);
-        delete yProp;
-    }
-    d_ptr->m_propertyToY.remove(property);
-
-    QtProperty *wProp = d_ptr->m_propertyToW[property];
-    if (wProp) {
-        d_ptr->m_wToProperty.remove(wProp);
-        delete wProp;
-    }
-    d_ptr->m_propertyToW.remove(property);
-
-    QtProperty *hProp = d_ptr->m_propertyToH[property];
-    if (hProp) {
-        d_ptr->m_hToProperty.remove(hProp);
-        delete hProp;
-    }
-    d_ptr->m_propertyToH.remove(property);
-
-    d_ptr->m_values.remove(property);
-}
-
-
 // QtEnumPropertyManager
 
 class QtEnumPropertyManagerPrivate
@@ -7101,7 +6488,24 @@ void QtColorPropertyManager::uninitializeProperty(QtProperty *property)
 
 // QtCursorPropertyManager
 
+// Make sure icons are removed as soon as QApplication is destroyed, otherwise,
+// handles are leaked on X11.
+static void clearCursorDatabase();
+namespace {
+struct CursorDatabase : public QtCursorDatabase
+{
+    CursorDatabase()
+    {
+        qAddPostRoutine(clearCursorDatabase);
+    }
+};
+}
 Q_GLOBAL_STATIC(QtCursorDatabase, cursorDatabase)
+
+static void clearCursorDatabase()
+{
+    cursorDatabase()->clear();
+}
 
 class QtCursorPropertyManagerPrivate
 {
@@ -7235,6 +6639,780 @@ void QtCursorPropertyManager::uninitializeProperty(QtProperty *property)
 {
     d_ptr->m_values.remove(property);
 }
+
+// QtMarginsPropertyManager
+
+class QtMarginsPropertyManagerPrivate
+{
+    QtMarginsPropertyManager *q_ptr;
+    Q_DECLARE_PUBLIC(QtMarginsPropertyManager)
+public:
+
+    void slotIntChanged(QtProperty *property, int value);
+    void slotPropertyDestroyed(QtProperty *property);
+    void setConstraint(QtProperty *property, const QMargins &constraint, const QMargins &val);
+
+    struct Data
+    {
+        Data() : val(0, 0, 0, 0) {}
+        QMargins val;
+        QMargins constraint;
+    };
+
+    typedef QMap<const QtProperty *, Data> PropertyValueMap;
+    PropertyValueMap m_values;
+
+    QtIntPropertyManager *m_intPropertyManager;
+
+    QMap<const QtProperty *, QtProperty *> m_propertyToX;
+    QMap<const QtProperty *, QtProperty *> m_propertyToY;
+    QMap<const QtProperty *, QtProperty *> m_propertyToW;
+    QMap<const QtProperty *, QtProperty *> m_propertyToH;
+
+    QMap<const QtProperty *, QtProperty *> m_xToProperty;
+    QMap<const QtProperty *, QtProperty *> m_yToProperty;
+    QMap<const QtProperty *, QtProperty *> m_wToProperty;
+    QMap<const QtProperty *, QtProperty *> m_hToProperty;
+};
+
+void QtMarginsPropertyManagerPrivate::slotIntChanged(QtProperty *property, int value)
+{
+    if (QtProperty *prop = m_xToProperty.value(property, 0)) {
+        QMargins r = m_values[prop].val;
+        r.setLeft(value);
+        q_ptr->setValue(prop, r);
+    } else if (QtProperty *prop = m_yToProperty.value(property)) {
+        QMargins r = m_values[prop].val;
+        r.setTop(value);
+        q_ptr->setValue(prop, r);
+    } else if (QtProperty *prop = m_wToProperty.value(property, 0)) {
+        Data data = m_values[prop];
+        QMargins r = data.val;
+        r.setRight(value);
+				// XXX constraints
+//        if (!data.constraint.isNull() && data.constraint.x() + data.constraint.width() < r.x() + r.width()) {
+//            r.moveLeft(data.constraint.left() + data.constraint.width() - r.width());
+//        }
+        q_ptr->setValue(prop, r);
+    } else if (QtProperty *prop = m_hToProperty.value(property, 0)) {
+        Data data = m_values[prop];
+        QMargins r = data.val;
+        r.setBottom(value);
+				// XXX constraints
+//        if (!data.constraint.isNull() && data.constraint.y() + data.constraint.height() < r.y() + r.height()) {
+//            r.moveTop(data.constraint.top() + data.constraint.height() - r.height());
+//        }
+        q_ptr->setValue(prop, r);
+    }
+}
+
+void QtMarginsPropertyManagerPrivate::slotPropertyDestroyed(QtProperty *property)
+{
+    if (QtProperty *pointProp = m_xToProperty.value(property, 0)) {
+        m_propertyToX[pointProp] = 0;
+        m_xToProperty.remove(property);
+    } else if (QtProperty *pointProp = m_yToProperty.value(property, 0)) {
+        m_propertyToY[pointProp] = 0;
+        m_yToProperty.remove(property);
+    } else if (QtProperty *pointProp = m_wToProperty.value(property, 0)) {
+        m_propertyToW[pointProp] = 0;
+        m_wToProperty.remove(property);
+    } else if (QtProperty *pointProp = m_hToProperty.value(property, 0)) {
+        m_propertyToH[pointProp] = 0;
+        m_hToProperty.remove(property);
+    }
+}
+
+void QtMarginsPropertyManagerPrivate::setConstraint(QtProperty *property,
+            const QMargins &constraint, const QMargins &val)
+{
+    const bool isNull = constraint.isNull();
+    const int left   = isNull ? INT_MAX : constraint.left();
+    const int right  = isNull ? INT_MAX : constraint.right();
+    const int top    = isNull ? INT_MAX : constraint.top();
+    const int bottom = isNull ? INT_MAX : constraint.bottom();
+
+    m_intPropertyManager->setRange(m_propertyToX[property], INT_MIN, INT_MAX);
+    m_intPropertyManager->setRange(m_propertyToY[property], INT_MIN, INT_MAX);
+    m_intPropertyManager->setRange(m_propertyToW[property], INT_MIN, INT_MAX);
+    m_intPropertyManager->setRange(m_propertyToH[property], INT_MIN, INT_MAX);
+
+    m_intPropertyManager->setValue(m_propertyToX[property], val.left());
+    m_intPropertyManager->setValue(m_propertyToY[property], val.top());
+    m_intPropertyManager->setValue(m_propertyToW[property], val.right());
+    m_intPropertyManager->setValue(m_propertyToH[property], val.bottom());
+}
+
+/*!
+    \class QtMarginsPropertyManager
+
+    \brief The QtMarginsPropertyManager provides and manages QMargins properties.
+
+    \sa QtAbstractPropertyManager, QtIntPropertyManager, QtRectPropertyManager
+*/
+
+/*!
+    \fn void QtRectPropertyManager::valueChanged(QtProperty *property, const QRect &value)
+
+    This signal is emitted whenever a property created by this manager
+    changes its value, passing a pointer to the \a property and the new
+    \a value as parameters.
+
+    \sa setValue()
+*/
+
+/*!
+    \fn void QtRectPropertyManager::constraintChanged(QtProperty *property, const QRect &constraint)
+
+    This signal is emitted whenever property changes its constraint
+    rectangle, passing a pointer to the \a property and the new \a
+    constraint rectangle as parameters.
+
+    \sa setConstraint()
+*/
+
+/*!
+    Creates a manager with the given \a parent.
+*/
+QtMarginsPropertyManager::QtMarginsPropertyManager(QObject *parent)
+    : QtAbstractPropertyManager(parent)
+{
+    d_ptr = new QtMarginsPropertyManagerPrivate;
+    d_ptr->q_ptr = this;
+
+    d_ptr->m_intPropertyManager = new QtIntPropertyManager(this);
+    connect(d_ptr->m_intPropertyManager, SIGNAL(valueChanged(QtProperty *, int)),
+                this, SLOT(slotIntChanged(QtProperty *, int)));
+    connect(d_ptr->m_intPropertyManager, SIGNAL(propertyDestroyed(QtProperty *)),
+                this, SLOT(slotPropertyDestroyed(QtProperty *)));
+}
+
+/*!
+    Destroys this manager, and all the properties it has created.
+*/
+QtMarginsPropertyManager::~QtMarginsPropertyManager()
+{
+    clear();
+    delete d_ptr;
+}
+
+/*!
+    Returns the manager that creates the nested \e x, \e y, \e width
+    and \e height subproperties.
+
+    In order to provide editing widgets for the mentioned
+    subproperties in a property browser widget, this manager must be
+    associated with an editor factory.
+
+    \sa QtAbstractPropertyBrowser::setFactoryForManager()
+*/
+QtIntPropertyManager *QtMarginsPropertyManager::subIntPropertyManager() const
+{
+    return d_ptr->m_intPropertyManager;
+}
+
+/*!
+    Returns the given \a property's value.
+
+    If the given \a property is not managed by this manager, this
+    function returns an invalid rectangle.
+
+    \sa setValue(), constraint()
+*/
+QMargins QtMarginsPropertyManager::value(const QtProperty *property) const
+{
+    return getValue<QMargins>(d_ptr->m_values, property);
+}
+
+/*!
+    Returns the given \a property's constraining rectangle. If returned value is null QRect it means there is no constraint applied.
+
+    \sa value(), setConstraint()
+*/
+QMargins QtMarginsPropertyManager::constraint(const QtProperty *property) const
+{
+    return getData<QMargins>(d_ptr->m_values, &QtMarginsPropertyManagerPrivate::Data::constraint, property, QMargins());
+}
+
+/*!
+    \reimp
+*/
+QString QtMarginsPropertyManager::valueText(const QtProperty *property) const
+{
+    const QtMarginsPropertyManagerPrivate::PropertyValueMap::const_iterator it = d_ptr->m_values.constFind(property);
+    if (it == d_ptr->m_values.constEnd())
+        return QString();
+    const QMargins v = it.value().val;
+    return QString(tr("[%1, %2, %3, %4]").arg(QString::number(v.left()))
+                                .arg(QString::number(v.top()))
+                                .arg(QString::number(v.right()))
+                                .arg(QString::number(v.bottom())));
+}
+
+/*!
+    \fn void QtMarginsPropertyManager::setValue(QtProperty *property, const QMargins &value)
+
+    Sets the value of the given \a property to \a value. Nested
+    properties are updated automatically.
+
+    If the specified \a value is not inside the given \a property's
+    constraining rectangle, the value is adjusted accordingly to fit
+    within the constraint.
+
+    \sa value(), setConstraint(), valueChanged()
+*/
+void QtMarginsPropertyManager::setValue(QtProperty *property, const QMargins &val)
+{
+    const QtMarginsPropertyManagerPrivate::PropertyValueMap::iterator it = d_ptr->m_values.find(property);
+    if (it == d_ptr->m_values.end())
+        return;
+
+    QtMarginsPropertyManagerPrivate::Data data = it.value();
+
+    QMargins newRect = val;
+    if (!data.constraint.isNull()) {
+        const QMargins r1 = data.constraint;
+        const QMargins r2 = newRect;
+        newRect.setLeft(qMax(r1.left(), r2.left()));
+        newRect.setRight(qMin(r1.right(), r2.right()));
+        newRect.setTop(qMax(r1.top(), r2.top()));
+        newRect.setBottom(qMin(r1.bottom(), r2.bottom()));
+    }
+
+    if (data.val == newRect)
+        return;
+
+    data.val = newRect;
+
+    it.value() = data;
+    d_ptr->m_intPropertyManager->setValue(d_ptr->m_propertyToX[property], newRect.left());
+    d_ptr->m_intPropertyManager->setValue(d_ptr->m_propertyToY[property], newRect.top());
+    d_ptr->m_intPropertyManager->setValue(d_ptr->m_propertyToW[property], newRect.right());
+    d_ptr->m_intPropertyManager->setValue(d_ptr->m_propertyToH[property], newRect.bottom());
+
+    emit propertyChanged(property);
+    emit valueChanged(property, data.val);
+}
+
+/*!
+    Sets the given \a property's constraining margins to \a
+    constraint.
+
+    When setting the constraint, the current value is adjusted if
+    necessary (ensuring that the current margins value is inside the
+    constraint). In order to reset the constraint pass a null QMargins value.
+
+    \sa setValue(), constraint(), constraintChanged()
+*/
+void QtMarginsPropertyManager::setConstraint(QtProperty *property, const QMargins &constraint)
+{
+    const QtMarginsPropertyManagerPrivate::PropertyValueMap::iterator it = d_ptr->m_values.find(property);
+    if (it == d_ptr->m_values.end())
+        return;
+
+    QtMarginsPropertyManagerPrivate::Data data = it.value();
+
+    QMargins newConstraint = constraint;
+    if (data.constraint == newConstraint)
+        return;
+
+    const QMargins oldVal = data.val;
+
+    data.constraint = newConstraint;
+
+    if (!data.constraint.isNull()) {
+        QMargins r1 = data.constraint;
+        QMargins r2 = data.val;
+				
+				// XXX constraints
+//        if (r2.ri() > r1.width())
+//            r2.setWidth(r1.width());
+//        if (r2.height() > r1.height())
+//            r2.setHeight(r1.height());
+//        if (r2.left() < r1.left())
+//            r2.moveLeft(r1.left());
+//        else if (r2.right() > r1.right())
+//            r2.moveRight(r1.right());
+//        if (r2.top() < r1.top())
+//            r2.moveTop(r1.top());
+//        else if (r2.bottom() > r1.bottom())
+//            r2.moveBottom(r1.bottom());
+
+        data.val = r2;
+    }
+
+    it.value() = data;
+
+    emit constraintChanged(property, data.constraint);
+
+    d_ptr->setConstraint(property, data.constraint, data.val);
+
+    if (data.val == oldVal)
+        return;
+
+    emit propertyChanged(property);
+    emit valueChanged(property, data.val);
+}
+
+/*!
+    \reimp
+*/
+void QtMarginsPropertyManager::initializeProperty(QtProperty *property)
+{
+    d_ptr->m_values[property] = QtMarginsPropertyManagerPrivate::Data();
+
+    QtProperty *xProp = d_ptr->m_intPropertyManager->addProperty();
+    xProp->setPropertyName(tr("Left"));
+    d_ptr->m_intPropertyManager->setValue(xProp, 0);
+    d_ptr->m_propertyToX[property] = xProp;
+    d_ptr->m_xToProperty[xProp] = property;
+    property->addSubProperty(xProp);
+
+    QtProperty *yProp = d_ptr->m_intPropertyManager->addProperty();
+    yProp->setPropertyName(tr("Top"));
+    d_ptr->m_intPropertyManager->setValue(yProp, 0);
+    d_ptr->m_propertyToY[property] = yProp;
+    d_ptr->m_yToProperty[yProp] = property;
+    property->addSubProperty(yProp);
+
+    QtProperty *wProp = d_ptr->m_intPropertyManager->addProperty();
+    wProp->setPropertyName(tr("Right"));
+    d_ptr->m_intPropertyManager->setValue(wProp, 0);
+    d_ptr->m_propertyToW[property] = wProp;
+    d_ptr->m_wToProperty[wProp] = property;
+    property->addSubProperty(wProp);
+
+    QtProperty *hProp = d_ptr->m_intPropertyManager->addProperty();
+    hProp->setPropertyName(tr("Bottom"));
+    d_ptr->m_intPropertyManager->setValue(hProp, 0);
+    d_ptr->m_propertyToH[property] = hProp;
+    d_ptr->m_hToProperty[hProp] = property;
+    property->addSubProperty(hProp);
+}
+
+/*!
+    \reimp
+*/
+void QtMarginsPropertyManager::uninitializeProperty(QtProperty *property)
+{
+    QtProperty *xProp = d_ptr->m_propertyToX[property];
+    if (xProp) {
+        d_ptr->m_xToProperty.remove(xProp);
+        delete xProp;
+    }
+    d_ptr->m_propertyToX.remove(property);
+
+    QtProperty *yProp = d_ptr->m_propertyToY[property];
+    if (yProp) {
+        d_ptr->m_yToProperty.remove(yProp);
+        delete yProp;
+    }
+    d_ptr->m_propertyToY.remove(property);
+
+    QtProperty *wProp = d_ptr->m_propertyToW[property];
+    if (wProp) {
+        d_ptr->m_wToProperty.remove(wProp);
+        delete wProp;
+    }
+    d_ptr->m_propertyToW.remove(property);
+
+    QtProperty *hProp = d_ptr->m_propertyToH[property];
+    if (hProp) {
+        d_ptr->m_hToProperty.remove(hProp);
+        delete hProp;
+    }
+    d_ptr->m_propertyToH.remove(property);
+
+    d_ptr->m_values.remove(property);
+}
+
+// QtMarginsFPropertyManager
+
+class QtMarginsFPropertyManagerPrivate
+{
+    QtMarginsFPropertyManager *q_ptr;
+    Q_DECLARE_PUBLIC(QtMarginsFPropertyManager)
+public:
+
+    void slotDoubleChanged(QtProperty *property, double value);
+    void slotPropertyDestroyed(QtProperty *property);
+    void setConstraint(QtProperty *property, const QMarginsF &constraint, const QMarginsF &val);
+
+    struct Data
+    {
+        Data() : val(0, 0, 0, 0) {}
+        QMarginsF val;
+        QMarginsF constraint;
+    };
+
+    typedef QMap<const QtProperty *, Data> PropertyValueMap;
+    PropertyValueMap m_values;
+
+    QtDoublePropertyManager *m_doublePropertyManager;
+
+    QMap<const QtProperty *, QtProperty *> m_propertyToX;
+    QMap<const QtProperty *, QtProperty *> m_propertyToY;
+    QMap<const QtProperty *, QtProperty *> m_propertyToW;
+    QMap<const QtProperty *, QtProperty *> m_propertyToH;
+
+    QMap<const QtProperty *, QtProperty *> m_xToProperty;
+    QMap<const QtProperty *, QtProperty *> m_yToProperty;
+    QMap<const QtProperty *, QtProperty *> m_wToProperty;
+    QMap<const QtProperty *, QtProperty *> m_hToProperty;
+};
+
+void QtMarginsFPropertyManagerPrivate::slotDoubleChanged(QtProperty *property, double value)
+{
+    if (QtProperty *prop = m_xToProperty.value(property, 0)) {
+        QMarginsF r = m_values[prop].val;
+        r.setLeft(value);
+        q_ptr->setValue(prop, r);
+    } else if (QtProperty *prop = m_yToProperty.value(property)) {
+        QMarginsF r = m_values[prop].val;
+        r.setTop(value);
+        q_ptr->setValue(prop, r);
+    } else if (QtProperty *prop = m_wToProperty.value(property, 0)) {
+        Data data = m_values[prop];
+        QMarginsF r = data.val;
+        r.setRight(value);
+				// XXX constraints
+//        if (!data.constraint.isNull() && data.constraint.x() + data.constraint.width() < r.x() + r.width()) {
+//            r.moveLeft(data.constraint.left() + data.constraint.width() - r.width());
+//        }
+        q_ptr->setValue(prop, r);
+    } else if (QtProperty *prop = m_hToProperty.value(property, 0)) {
+        Data data = m_values[prop];
+        QMarginsF r = data.val;
+        r.setBottom(value);
+				// XXX constraints
+//        if (!data.constraint.isNull() && data.constraint.y() + data.constraint.height() < r.y() + r.height()) {
+//            r.moveTop(data.constraint.top() + data.constraint.height() - r.height());
+//        }
+        q_ptr->setValue(prop, r);
+    }
+}
+
+void QtMarginsFPropertyManagerPrivate::slotPropertyDestroyed(QtProperty *property)
+{
+    if (QtProperty *pointProp = m_xToProperty.value(property, 0)) {
+        m_propertyToX[pointProp] = 0;
+        m_xToProperty.remove(property);
+    } else if (QtProperty *pointProp = m_yToProperty.value(property, 0)) {
+        m_propertyToY[pointProp] = 0;
+        m_yToProperty.remove(property);
+    } else if (QtProperty *pointProp = m_wToProperty.value(property, 0)) {
+        m_propertyToW[pointProp] = 0;
+        m_wToProperty.remove(property);
+    } else if (QtProperty *pointProp = m_hToProperty.value(property, 0)) {
+        m_propertyToH[pointProp] = 0;
+        m_hToProperty.remove(property);
+    }
+}
+
+void QtMarginsFPropertyManagerPrivate::setConstraint(QtProperty *property,
+            const QMarginsF &constraint, const QMarginsF &val)
+{
+    const bool isNull = constraint.isNull();
+    const int left   = isNull ? DBL_MAX : constraint.left();
+    const int right  = isNull ? DBL_MAX : constraint.right();
+    const int top    = isNull ? DBL_MAX : constraint.top();
+    const int bottom = isNull ? DBL_MAX : constraint.bottom();
+
+    m_doublePropertyManager->setRange(m_propertyToX[property], DBL_MIN, DBL_MAX);
+    m_doublePropertyManager->setRange(m_propertyToY[property], DBL_MIN, DBL_MAX);
+    m_doublePropertyManager->setRange(m_propertyToW[property], DBL_MIN, DBL_MAX);
+    m_doublePropertyManager->setRange(m_propertyToH[property], DBL_MIN, DBL_MAX);
+
+    m_doublePropertyManager->setValue(m_propertyToX[property], val.left());
+    m_doublePropertyManager->setValue(m_propertyToY[property], val.top());
+    m_doublePropertyManager->setValue(m_propertyToW[property], val.right());
+    m_doublePropertyManager->setValue(m_propertyToH[property], val.bottom());
+}
+
+/*!
+    \class QtMarginsFPropertyManager
+
+    \brief The QtMarginsFPropertyManager provides and manages QMarginsF properties.
+
+    \sa QtAbstractPropertyManager, QtIntPropertyManager, QtRectPropertyManager
+*/
+
+/*!
+    \fn void QtRectPropertyManager::valueChanged(QtProperty *property, const QRect &value)
+
+    This signal is emitted whenever a property created by this manager
+    changes its value, passing a pointer to the \a property and the new
+    \a value as parameters.
+
+    \sa setValue()
+*/
+
+/*!
+    \fn void QtRectPropertyManager::constraintChanged(QtProperty *property, const QRect &constraint)
+
+    This signal is emitted whenever property changes its constraint
+    rectangle, passing a pointer to the \a property and the new \a
+    constraint rectangle as parameters.
+
+    \sa setConstraint()
+*/
+
+/*!
+    Creates a manager with the given \a parent.
+*/
+QtMarginsFPropertyManager::QtMarginsFPropertyManager(QObject *parent)
+    : QtAbstractPropertyManager(parent)
+{
+    d_ptr = new QtMarginsFPropertyManagerPrivate;
+    d_ptr->q_ptr = this;
+
+    d_ptr->m_doublePropertyManager = new QtDoublePropertyManager(this);
+    connect(d_ptr->m_doublePropertyManager, SIGNAL(valueChanged(QtProperty *, double)),
+                this, SLOT(slotDoubleChanged(QtProperty *, double)));
+    connect(d_ptr->m_doublePropertyManager, SIGNAL(propertyDestroyed(QtProperty *)),
+                this, SLOT(slotPropertyDestroyed(QtProperty *)));
+}
+
+/*!
+    Destroys this manager, and all the properties it has created.
+*/
+QtMarginsFPropertyManager::~QtMarginsFPropertyManager()
+{
+    clear();
+    delete d_ptr;
+}
+
+/*!
+    Returns the manager that creates the nested \e x, \e y, \e width
+    and \e height subproperties.
+
+    In order to provide editing widgets for the mentioned
+    subproperties in a property browser widget, this manager must be
+    associated with an editor factory.
+
+    \sa QtAbstractPropertyBrowser::setFactoryForManager()
+*/
+QtDoublePropertyManager *QtMarginsFPropertyManager::subDoublePropertyManager() const
+{
+    return d_ptr->m_doublePropertyManager;
+}
+
+/*!
+    Returns the given \a property's value.
+
+    If the given \a property is not managed by this manager, this
+    function returns an invalid rectangle.
+
+    \sa setValue(), constraint()
+*/
+QMarginsF QtMarginsFPropertyManager::value(const QtProperty *property) const
+{
+    return getValue<QMarginsF>(d_ptr->m_values, property);
+}
+
+/*!
+    Returns the given \a property's constraining rectangle. If returned value is null QRect it means there is no constraint applied.
+
+    \sa value(), setConstraint()
+*/
+QMarginsF QtMarginsFPropertyManager::constraint(const QtProperty *property) const
+{
+    return getData<QMarginsF>(d_ptr->m_values, &QtMarginsFPropertyManagerPrivate::Data::constraint, property, QMarginsF());
+}
+
+/*!
+    \reimp
+*/
+QString QtMarginsFPropertyManager::valueText(const QtProperty *property) const
+{
+    const QtMarginsFPropertyManagerPrivate::PropertyValueMap::const_iterator it = d_ptr->m_values.constFind(property);
+    if (it == d_ptr->m_values.constEnd())
+        return QString();
+    const QMarginsF v = it.value().val;
+    return QString(tr("[%1, %2, %3, %4]").arg(QString::number(v.left()))
+                                .arg(QString::number(v.top()))
+                                .arg(QString::number(v.right()))
+                                .arg(QString::number(v.bottom())));
+}
+
+/*!
+    \fn void QtMarginsFPropertyManager::setValue(QtProperty *property, const QMarginsF &value)
+
+    Sets the value of the given \a property to \a value. Nested
+    properties are updated automatically.
+
+    If the specified \a value is not inside the given \a property's
+    constraining rectangle, the value is adjusted accordingly to fit
+    within the constraint.
+
+    \sa value(), setConstraint(), valueChanged()
+*/
+void QtMarginsFPropertyManager::setValue(QtProperty *property, const QMarginsF &val)
+{
+    const QtMarginsFPropertyManagerPrivate::PropertyValueMap::iterator it = d_ptr->m_values.find(property);
+    if (it == d_ptr->m_values.end())
+        return;
+
+    QtMarginsFPropertyManagerPrivate::Data data = it.value();
+
+    QMarginsF newRect = val;
+    if (!data.constraint.isNull()) {
+        const QMarginsF r1 = data.constraint;
+        const QMarginsF r2 = newRect;
+        newRect.setLeft(qMax(r1.left(), r2.left()));
+        newRect.setRight(qMin(r1.right(), r2.right()));
+        newRect.setTop(qMax(r1.top(), r2.top()));
+        newRect.setBottom(qMin(r1.bottom(), r2.bottom()));
+    }
+
+    if (data.val == newRect)
+        return;
+
+    data.val = newRect;
+
+    it.value() = data;
+    d_ptr->m_doublePropertyManager->setValue(d_ptr->m_propertyToX[property], newRect.left());
+    d_ptr->m_doublePropertyManager->setValue(d_ptr->m_propertyToY[property], newRect.top());
+    d_ptr->m_doublePropertyManager->setValue(d_ptr->m_propertyToW[property], newRect.right());
+    d_ptr->m_doublePropertyManager->setValue(d_ptr->m_propertyToH[property], newRect.bottom());
+
+    emit propertyChanged(property);
+    emit valueChanged(property, data.val);
+}
+
+/*!
+    Sets the given \a property's constraining margins to \a
+    constraint.
+
+    When setting the constraint, the current value is adjusted if
+    necessary (ensuring that the current margins value is inside the
+    constraint). In order to reset the constraint pass a null QMarginsF value.
+
+    \sa setValue(), constraint(), constraintChanged()
+*/
+void QtMarginsFPropertyManager::setConstraint(QtProperty *property, const QMarginsF &constraint)
+{
+    const QtMarginsFPropertyManagerPrivate::PropertyValueMap::iterator it = d_ptr->m_values.find(property);
+    if (it == d_ptr->m_values.end())
+        return;
+
+    QtMarginsFPropertyManagerPrivate::Data data = it.value();
+
+    QMarginsF newConstraint = constraint;
+    if (data.constraint == newConstraint)
+        return;
+
+    const QMarginsF oldVal = data.val;
+
+    data.constraint = newConstraint;
+
+    if (!data.constraint.isNull()) {
+        QMarginsF r1 = data.constraint;
+        QMarginsF r2 = data.val;
+				
+				// XXX constraints
+//        if (r2.ri() > r1.width())
+//            r2.setWidth(r1.width());
+//        if (r2.height() > r1.height())
+//            r2.setHeight(r1.height());
+//        if (r2.left() < r1.left())
+//            r2.moveLeft(r1.left());
+//        else if (r2.right() > r1.right())
+//            r2.moveRight(r1.right());
+//        if (r2.top() < r1.top())
+//            r2.moveTop(r1.top());
+//        else if (r2.bottom() > r1.bottom())
+//            r2.moveBottom(r1.bottom());
+
+        data.val = r2;
+    }
+
+    it.value() = data;
+
+    emit constraintChanged(property, data.constraint);
+
+    d_ptr->setConstraint(property, data.constraint, data.val);
+
+    if (data.val == oldVal)
+        return;
+
+    emit propertyChanged(property);
+    emit valueChanged(property, data.val);
+}
+
+/*!
+    \reimp
+*/
+void QtMarginsFPropertyManager::initializeProperty(QtProperty *property)
+{
+    d_ptr->m_values[property] = QtMarginsFPropertyManagerPrivate::Data();
+
+    QtProperty *xProp = d_ptr->m_doublePropertyManager->addProperty();
+    xProp->setPropertyName(tr("Left"));
+    d_ptr->m_doublePropertyManager->setValue(xProp, 0);
+    d_ptr->m_propertyToX[property] = xProp;
+    d_ptr->m_xToProperty[xProp] = property;
+    property->addSubProperty(xProp);
+
+    QtProperty *yProp = d_ptr->m_doublePropertyManager->addProperty();
+    yProp->setPropertyName(tr("Top"));
+    d_ptr->m_doublePropertyManager->setValue(yProp, 0);
+    d_ptr->m_propertyToY[property] = yProp;
+    d_ptr->m_yToProperty[yProp] = property;
+    property->addSubProperty(yProp);
+
+    QtProperty *wProp = d_ptr->m_doublePropertyManager->addProperty();
+    wProp->setPropertyName(tr("Right"));
+    d_ptr->m_doublePropertyManager->setValue(wProp, 0);
+    d_ptr->m_propertyToW[property] = wProp;
+    d_ptr->m_wToProperty[wProp] = property;
+    property->addSubProperty(wProp);
+
+    QtProperty *hProp = d_ptr->m_doublePropertyManager->addProperty();
+    hProp->setPropertyName(tr("Bottom"));
+    d_ptr->m_doublePropertyManager->setValue(hProp, 0);
+    d_ptr->m_propertyToH[property] = hProp;
+    d_ptr->m_hToProperty[hProp] = property;
+    property->addSubProperty(hProp);
+}
+
+/*!
+    \reimp
+*/
+void QtMarginsFPropertyManager::uninitializeProperty(QtProperty *property)
+{
+    QtProperty *xProp = d_ptr->m_propertyToX[property];
+    if (xProp) {
+        d_ptr->m_xToProperty.remove(xProp);
+        delete xProp;
+    }
+    d_ptr->m_propertyToX.remove(property);
+
+    QtProperty *yProp = d_ptr->m_propertyToY[property];
+    if (yProp) {
+        d_ptr->m_yToProperty.remove(yProp);
+        delete yProp;
+    }
+    d_ptr->m_propertyToY.remove(property);
+
+    QtProperty *wProp = d_ptr->m_propertyToW[property];
+    if (wProp) {
+        d_ptr->m_wToProperty.remove(wProp);
+        delete wProp;
+    }
+    d_ptr->m_propertyToW.remove(property);
+
+    QtProperty *hProp = d_ptr->m_propertyToH[property];
+    if (hProp) {
+        d_ptr->m_hToProperty.remove(hProp);
+        delete hProp;
+    }
+    d_ptr->m_propertyToH.remove(property);
+
+    d_ptr->m_values.remove(property);
+}
+
+
 
 #if QT_VERSION >= 0x040400
 QT_END_NAMESPACE

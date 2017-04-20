@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of the Qt Solutions component.
@@ -38,21 +38,21 @@
 **
 ****************************************************************************/
 
-#include <QtWidgets/QApplication>
-#include <QtWidgets/QSpinBox>
-#include <QtWidgets/QDialogButtonBox>
-#include <QtWidgets/QLineEdit>
-#include <QtWidgets/QDialog>
-#include <QtWidgets/QComboBox>
-#include <QtWidgets/QToolButton>
-#include <QtWidgets/QPushButton>
-#include <QtWidgets/QBoxLayout>
-#include <QtWidgets/QTreeWidget>
-#include <QtWidgets/QAction>
-#include <QtWidgets/QDesktopWidget>
-#include <QtGui/QTextDocument>
-#include <QtWidgets/QCalendarWidget>
-#include <QtCore/QTimeLine>
+#include <QApplication>
+#include <QSpinBox>
+#include <QDialogButtonBox>
+#include <QLineEdit>
+#include <QDialog>
+#include <QComboBox>
+#include <QToolButton>
+#include <QPushButton>
+#include <QBoxLayout>
+#include <QTreeWidget>
+#include <QAction>
+#include <QDesktopWidget>
+#include <QTextDocument>
+#include <QCalendarWidget>
+#include <QTimeLine>
 #include "objectcontroller.h"
 
 class MyController : public QDialog

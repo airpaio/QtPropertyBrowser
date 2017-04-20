@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of the Qt Solutions component.
@@ -43,14 +43,14 @@
 #define QTPROPERTYBROWSER_H
 
 #include <QWidget>
-#include <QtCore/QSet>
+#include <QSet>
 #include <QLineEdit>
 
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
 #endif
 
-#if defined(Q_WS_WIN)
+#if defined(Q_OS_WIN)
 #  if !defined(QT_QTPROPERTYBROWSER_EXPORT) && !defined(QT_QTPROPERTYBROWSER_IMPORT)
 #    define QT_QTPROPERTYBROWSER_EXPORT
 #  elif defined(QT_QTPROPERTYBROWSER_IMPORT)
@@ -65,8 +65,6 @@ QT_BEGIN_NAMESPACE
 #else
 #  define QT_QTPROPERTYBROWSER_EXPORT
 #endif
-
-
 
 typedef QLineEdit::EchoMode EchoMode;
 

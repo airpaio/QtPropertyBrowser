@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of the Qt Solutions component.
@@ -40,8 +40,8 @@
 
 
 #include "qttreepropertybrowser.h"
-#include <QtCore/QSet>
-#include <QtGui/QIcon>
+#include <QSet>
+#include <QIcon>
 #include <QTreeWidget>
 #include <QItemDelegate>
 #include <QHBoxLayout>
@@ -50,7 +50,7 @@
 #include <QApplication>
 #include <QFocusEvent>
 #include <QStyle>
-#include <QtGui/QPalette>
+#include <QPalette>
 
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
@@ -471,11 +471,12 @@ void QtTreePropertyBrowserPrivate::init(QWidget *parent)
     m_treeWidget->setEditorPrivate(this);
     m_treeWidget->setIconSize(QSize(18, 18));
     layout->addWidget(m_treeWidget);
+    parent->setFocusProxy(m_treeWidget);
 
     m_treeWidget->setColumnCount(2);
     QStringList labels;
-    labels.append(QApplication::translate("QtTreePropertyBrowser", "Property", 0));
-    labels.append(QApplication::translate("QtTreePropertyBrowser", "Value", 0));
+    labels.append(QCoreApplication::translate("QtTreePropertyBrowser", "Property"));
+    labels.append(QCoreApplication::translate("QtTreePropertyBrowser", "Value"));
     m_treeWidget->setHeaderLabels(labels);
     m_treeWidget->setAlternatingRowColors(true);
     m_treeWidget->setEditTriggers(QAbstractItemView::EditKeyPressed);

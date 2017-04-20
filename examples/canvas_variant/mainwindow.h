@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of the Qt Solutions component.
@@ -42,7 +42,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QtCore/QMap>
+#include <QMap>
 #include "qtcanvas.h"
 
 class QtVariantProperty;

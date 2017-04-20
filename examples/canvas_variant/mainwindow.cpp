@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of the Qt Solutions component.
@@ -41,8 +41,8 @@
 #include "mainwindow.h"
 #include "qtvariantproperty.h"
 #include "qttreepropertybrowser.h"
-#include <QtGui/QMatrix>
-#include <QtGui/QMouseEvent>
+#include <QMatrix>
+#include <QMouseEvent>
 #include <QMenuBar>
 #include <QMenu>
 #include <QAction>
@@ -385,19 +385,19 @@ void MainWindow::valueChanged(QtProperty *property, const QVariant &value)
     } else if (id == QLatin1String("text")) {
         if (currentItem->rtti() == QtCanvasItem::Rtti_Text) {
             QtCanvasText *i = (QtCanvasText *)currentItem;
-            i->setText(qvariant_cast<QString>(value));
+            i->setText(value.value<QString>());
         }
     } else if (id == QLatin1String("color")) {
         if (currentItem->rtti() == QtCanvasItem::Rtti_Text) {
             QtCanvasText *i = (QtCanvasText *)currentItem;
-            i->setColor(qvariant_cast<QColor>(value));
+            i->setColor(value.value<QColor>());
         }
     } else if (id == QLatin1String("brush")) {
         if (currentItem->rtti() == QtCanvasItem::Rtti_Rectangle ||
                 currentItem->rtti() == QtCanvasItem::Rtti_Ellipse) {
             QtCanvasPolygonalItem *i = (QtCanvasPolygonalItem *)currentItem;
             QBrush b = i->brush();
-            b.setColor(qvariant_cast<QColor>(value));
+            b.setColor(value.value<QColor>());
             i->setBrush(b);
         }
     } else if (id == QLatin1String("pen")) {
@@ -405,28 +405,28 @@ void MainWindow::valueChanged(QtProperty *property, const QVariant &value)
                 currentItem->rtti() == QtCanvasItem::Rtti_Line) {
             QtCanvasPolygonalItem *i = (QtCanvasPolygonalItem *)currentItem;
             QPen p = i->pen();
-            p.setColor(qvariant_cast<QColor>(value));
+            p.setColor(value.value<QColor>());
             i->setPen(p);
         }
     } else if (id == QLatin1String("font")) {
         if (currentItem->rtti() == QtCanvasItem::Rtti_Text) {
             QtCanvasText *i = (QtCanvasText *)currentItem;
-            i->setFont(qvariant_cast<QFont>(value));
+            i->setFont(value.value<QFont>());
         }
     } else if (id == QLatin1String("endpoint")) {
         if (currentItem->rtti() == QtCanvasItem::Rtti_Line) {
             QtCanvasLine *i = (QtCanvasLine *)currentItem;
-            QPoint p = qvariant_cast<QPoint>(value);
+            QPoint p = value.value<QPoint>();
             i->setPoints(i->startPoint().x(), i->startPoint().y(), p.x(), p.y());
         }
     } else if (id == QLatin1String("size")) {
         if (currentItem->rtti() == QtCanvasItem::Rtti_Rectangle) {
             QtCanvasRectangle *i = (QtCanvasRectangle *)currentItem;
-            QSize s = qvariant_cast<QSize>(value);
+            QSize s = value.value<QSize>();
             i->setSize(s.width(), s.height());
         } else if (currentItem->rtti() == QtCanvasItem::Rtti_Ellipse) {
             QtCanvasEllipse *i = (QtCanvasEllipse *)currentItem;
-            QSize s = qvariant_cast<QSize>(value);
+            QSize s = value.value<QSize>();
             i->setSize(s.width(), s.height());
         }
     }
