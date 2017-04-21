@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of the Qt Solutions component.
@@ -41,10 +41,10 @@
 #ifndef QTCANVAS_H
 #define QTCANVAS_H
 
-#include <QtGui/qpixmap.h>
-#include <QtGui/qbrush.h>
-#include <QtGui/qpen.h>
-#include <QtGui/qpolygon.h>
+#include <qpixmap.h>
+#include <qbrush.h>
+#include <qpen.h>
+#include <qpolygon.h>
 #include <qscrollarea.h>
 
 class QtCanvasSprite;

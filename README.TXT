@@ -1,4 +1,4 @@
-Qt Solutions Component: Property Browser - qtpropertybrowser (ported to Qt5)
+Qt Solutions Component: Property Browser
 
 A property browser framework enabling the user to edit a set of
 properties.
@@ -101,3 +101,4 @@ Version history:
      least one character and an icon.
      - Make it possible to properly style custom embedded editors (e.g.
      the color editor provided with the solution).
+

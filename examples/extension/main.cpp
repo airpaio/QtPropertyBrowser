@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of the Qt Solutions component.
@@ -38,7 +38,7 @@
 **
 ****************************************************************************/
 
-#include <QtWidgets/QApplication>
+#include <QApplication>
 #include "qtvariantproperty.h"
 #include "qteditorfactory.h"
 #include "qttreepropertybrowser.h"
@@ -94,14 +94,14 @@ void VariantManager::slotValueChanged(QtProperty *property, const QVariant &valu
     if (xToProperty.contains(property)) {
         QtProperty *pointProperty = xToProperty[property];
         QVariant v = this->value(pointProperty);
-        QPointF p = qvariant_cast<QPointF>(v);
-        p.setX(qvariant_cast<double>(value));
+        QPointF p = v.value<QPointF>();
+        p.setX(value.value<double>());
         setValue(pointProperty, p);
     } else if (yToProperty.contains(property)) {
         QtProperty *pointProperty = yToProperty[property];
         QVariant v = this->value(pointProperty);
-        QPointF p = qvariant_cast<QPointF>(v);
-        p.setY(qvariant_cast<double>(value));
+        QPointF p = v.value<QPointF>();
+        p.setY(value.value<double>());
         setValue(pointProperty, p);
     }
 }
@@ -144,7 +144,7 @@ QString VariantManager::valueText(const QtProperty *property) const
 {
     if (propertyToData.contains(property)) {
         QVariant v = propertyToData[property].value;
-        QPointF p = qvariant_cast<QPointF>(v);
+        QPointF p = v.value<QPointF>();
         return QString(tr("(%1, %2)").arg(QString::number(p.x()))
                                  .arg(QString::number(p.y())));
     }
@@ -156,7 +156,7 @@ void VariantManager::setValue(QtProperty *property, const QVariant &val)
     if (propertyToData.contains(property)) {
         if (val.type() != QVariant::PointF && !val.canConvert(QVariant::PointF))
             return;
-        QPointF p = qvariant_cast<QPointF>(val);
+        QPointF p = val.value<QPointF>();
         Data d = propertyToData[property];
         d.value = p;
         if (d.x)

@@ -9,3 +9,6 @@ examples/demo/demo
 examples/extension/extension
 examples/object_controller/object_controller
 examples/simple/simple
+debug
+release
+Makefile*

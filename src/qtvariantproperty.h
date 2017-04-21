@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of the Qt Solutions component.
@@ -43,8 +43,8 @@
 #define QTVARIANTPROPERTY_H
 
 #include "qtpropertybrowser.h"
-#include <QtCore/QVariant>
-#include <QtGui/QIcon>
+#include <QVariant>
+#include <QIcon>
 
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of the Qt Solutions component.
@@ -40,11 +40,11 @@
 
 
 #include "qtbuttonpropertybrowser.h"
-#include <QtCore/QSet>
+#include <QSet>
 #include <QGridLayout>
 #include <QLabel>
-#include <QtCore/QTimer>
-#include <QtCore/QMap>
+#include <QTimer>
+#include <QMap>
 #include <QToolButton>
 #include <QStyle>
 
@@ -278,14 +278,11 @@ void QtButtonPropertyBrowserPrivate::propertyInserted(QtBrowserItem *index, QtBr
         if (!parentItem->container) {
             m_recreateQueue.removeAll(parentItem);
             WidgetItem *grandParent = parentItem->parent;
-            QWidget *w = 0;
             QGridLayout *l = 0;
             const int oldRow = gridRow(parentItem);
             if (grandParent) {
-                w = grandParent->container;
                 l = grandParent->layout;
             } else {
-                w = q_ptr;
                 l = m_mainLayout;
             }
             QFrame *container = new QFrame();

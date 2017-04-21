@@ -1,5 +1,4 @@
 TEMPLATE = app
-QT += widgets
 DEPENDPATH += .
 INCLUDEPATH += .
 

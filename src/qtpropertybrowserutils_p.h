@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of the Qt Solutions component.
@@ -53,10 +53,10 @@
 #ifndef QTPROPERTYBROWSERUTILS_H
 #define QTPROPERTYBROWSERUTILS_H
 
-#include <QtCore/QMap>
-#include <QtGui/QIcon>
-#include <QtWidgets/QWidget>
-#include <QtCore/QStringList>
+#include <QMap>
+#include <QIcon>
+#include <QWidget>
+#include <QStringList>
 
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
@@ -70,6 +70,7 @@ class QtCursorDatabase
 {
 public:
     QtCursorDatabase();
+    void clear();
 
     QStringList cursorShapeNames() const;
     QMap<int, QIcon> cursorShapeIcons() const;

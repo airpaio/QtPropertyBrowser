@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of the Qt Solutions component.
@@ -40,12 +40,12 @@
 
 
 #include "qtgroupboxpropertybrowser.h"
-#include <QtCore/QSet>
+#include <QSet>
 #include <QGridLayout>
 #include <QLabel>
 #include <QGroupBox>
-#include <QtCore/QTimer>
-#include <QtCore/QMap>
+#include <QTimer>
+#include <QMap>
 
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
@@ -313,15 +313,12 @@ void QtGroupBoxPropertyBrowserPrivate::propertyRemoved(QtBrowserItem *index)
         removeRow(parentItem->layout, row);
     } else {
         WidgetItem *par = parentItem->parent;
-        QWidget *w = 0;
         QGridLayout *l = 0;
         int oldRow = -1;
         if (!par) {
-            w = q_ptr;
             l = m_mainLayout;
             oldRow = m_children.indexOf(parentItem);
         } else {
-            w = par->groupBox;
             l = par->layout;
             oldRow = par->children.indexOf(parentItem);
             if (hasHeader(par))

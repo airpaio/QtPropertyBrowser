@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of the Qt Solutions component.
@@ -93,10 +93,10 @@ public:
     int splitterPosition() const;
     void setSplitterPosition(int position);
 		
-		void setExpanded(QtBrowserItem *item, bool expanded);
+    void setExpanded(QtBrowserItem *item, bool expanded);
     bool isExpanded(QtBrowserItem *item) const;
 		
-		void setSelected(QtBrowserItem *item, bool selected);
+    void setSelected(QtBrowserItem *item, bool selected);
     bool isSelected(QtBrowserItem *item) const;
 
     bool isItemVisible(QtBrowserItem *item) const;

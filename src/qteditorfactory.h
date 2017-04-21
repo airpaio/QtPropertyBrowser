@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of the Qt Solutions component.
@@ -68,6 +68,7 @@ private:
     Q_PRIVATE_SLOT(d_func(), void slotPropertyChanged(QtProperty *, int))
     Q_PRIVATE_SLOT(d_func(), void slotRangeChanged(QtProperty *, int, int))
     Q_PRIVATE_SLOT(d_func(), void slotSingleStepChanged(QtProperty *, int))
+    Q_PRIVATE_SLOT(d_func(), void slotReadOnlyChanged(QtProperty *, bool))
     Q_PRIVATE_SLOT(d_func(), void slotSetValue(int))
     Q_PRIVATE_SLOT(d_func(), void slotEditorDestroyed(QObject *))
 };
@@ -138,6 +139,7 @@ private:
     Q_DECLARE_PRIVATE(QtCheckBoxFactory)
     Q_DISABLE_COPY(QtCheckBoxFactory)
     Q_PRIVATE_SLOT(d_func(), void slotPropertyChanged(QtProperty *, bool))
+    Q_PRIVATE_SLOT(d_func(), void slotTextVisibleChanged(QtProperty *, bool))
     Q_PRIVATE_SLOT(d_func(), void slotSetValue(bool))
     Q_PRIVATE_SLOT(d_func(), void slotEditorDestroyed(QObject *))
 };
@@ -163,6 +165,7 @@ private:
     Q_PRIVATE_SLOT(d_func(), void slotRangeChanged(QtProperty *, double, double))
     Q_PRIVATE_SLOT(d_func(), void slotSingleStepChanged(QtProperty *, double))
     Q_PRIVATE_SLOT(d_func(), void slotDecimalsChanged(QtProperty *, int))
+    Q_PRIVATE_SLOT(d_func(), void slotReadOnlyChanged(QtProperty *, bool))
     Q_PRIVATE_SLOT(d_func(), void slotSetValue(double))
     Q_PRIVATE_SLOT(d_func(), void slotEditorDestroyed(QObject *))
 };
@@ -187,6 +190,7 @@ private:
     Q_PRIVATE_SLOT(d_func(), void slotPropertyChanged(QtProperty *, const QString &))
     Q_PRIVATE_SLOT(d_func(), void slotRegExpChanged(QtProperty *, const QRegExp &))
     Q_PRIVATE_SLOT(d_func(), void slotEchoModeChanged(QtProperty *, int))
+    Q_PRIVATE_SLOT(d_func(), void slotReadOnlyChanged(QtProperty *, bool))
     Q_PRIVATE_SLOT(d_func(), void slotSetValue(const QString &))
     Q_PRIVATE_SLOT(d_func(), void slotEditorDestroyed(QObject *))
 };

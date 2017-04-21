@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of the Qt Solutions component.
@@ -42,12 +42,12 @@
 #include "qtpropertymanager.h"
 #include "qteditorfactory.h"
 #include "qttreepropertybrowser.h"
-#include <QtGui/QMatrix>
-#include <QtGui/QMouseEvent>
-#include <QtWidgets/QMenuBar>
-#include <QtWidgets/QMenu>
-#include <QtWidgets/QAction>
-#include <QtWidgets/QDockWidget>
+#include <QMatrix>
+#include <QMouseEvent>
+#include <QMenuBar>
+#include <QMenu>
+#include <QAction>
+#include <QDockWidget>
 
 void CanvasView::contentsMousePressEvent(QMouseEvent* event)
 {
